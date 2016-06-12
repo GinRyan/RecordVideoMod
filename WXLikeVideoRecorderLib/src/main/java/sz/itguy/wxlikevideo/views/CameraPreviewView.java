@@ -27,6 +27,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import sz.itguy.utils.SystemVersionUtil;
 import sz.itguy.wxlikevideo.R;
 import sz.itguy.wxlikevideo.camera.CameraHelper;
 
@@ -322,23 +323,23 @@ public class CameraPreviewView extends FrameLayout {
             mCamera.cancelAutoFocus();
             // 设置对焦方式为自动对焦
             CameraHelper.setCameraFocusMode(Camera.Parameters.FOCUS_MODE_AUTO, mCamera);
-//            if (SystemVersionUtil.hasICS()) {
-//                // 计算对焦区域
-//                Rect focusRect = calculateTapArea(x, y, 1f);
-//                List<Camera.Area> focusAreas = new ArrayList<>();
-//                focusAreas.add(new Camera.Area(focusRect, 1000));
-//
-//                Rect meteringRect = calculateTapArea(x, y, 1.5f);
-//                List<Camera.Area> meteringAreas = new ArrayList<>();
-//                meteringAreas.add(new Camera.Area(meteringRect, 1000));
-//                // 设置对焦区域
-//                Camera.Parameters parameters = mCamera.getParameters();
-//                parameters.setFocusAreas(focusAreas);
-//                if (parameters.getMaxNumMeteringAreas() > 0) {
-//                    parameters.setMeteringAreas(meteringAreas);
-//                }
-//                mCamera.setParameters(parameters);
-//            }
+            if (SystemVersionUtil.hasICS()) {
+                // 计算对焦区域
+                Rect focusRect = calculateTapArea(x, y, 1f);
+                List<Camera.Area> focusAreas = new ArrayList<>();
+                focusAreas.add(new Camera.Area(focusRect, 1000));
+
+                Rect meteringRect = calculateTapArea(x, y, 1.5f);
+                List<Camera.Area> meteringAreas = new ArrayList<>();
+                meteringAreas.add(new Camera.Area(meteringRect, 1000));
+                // 设置对焦区域
+                Camera.Parameters parameters = mCamera.getParameters();
+                parameters.setFocusAreas(focusAreas);
+                if (parameters.getMaxNumMeteringAreas() > 0) {
+                    parameters.setMeteringAreas(meteringAreas);
+                }
+                mCamera.setParameters(parameters);
+            }
 
             mCamera.autoFocus(this);
 

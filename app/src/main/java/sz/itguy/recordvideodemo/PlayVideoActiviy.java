@@ -3,6 +3,7 @@ package sz.itguy.recordvideodemo;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
+import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;

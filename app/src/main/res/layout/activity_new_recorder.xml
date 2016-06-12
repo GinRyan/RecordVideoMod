@@ -1,37 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:keepScreenOn="true"
-    >
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:keepScreenOn="true">
+
     <sz.itguy.wxlikevideo.views.CameraPreviewView
         android:id="@+id/camera_preview"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        />
+        android:layout_height="wrap_content" />
 
     <FrameLayout
-                  android:orientation="horizontal"
-                  android:layout_below="@id/camera_preview"
-                  android:layout_width="fill_parent"
-                  android:gravity="center"
-                  android:background="@android:color/black"
-                  android:layout_height="match_parent"
-        >
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/camera_preview"
+        android:background="@android:color/black"
+        android:gravity="center"
+        android:orientation="horizontal">
+
         <sz.itguy.wxlikevideo.views.CircleBackgroundTextView
             android:id="@+id/button_start"
-            android:text="按住拍"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
             android:onClick="onClick"
-            />
+            android:text="按住拍" />
     </FrameLayout>
 
     <TextView
         android:id="@+id/filePathTextView"
         android:layout_width="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" />
 
 </RelativeLayout>
