@@ -27,9 +27,9 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
     private static final String TAG = "NewRecordVideoActivity";
 
     // 输出宽度
-    private static final int OUTPUT_WIDTH = 640;
+    private static final int OUTPUT_WIDTH = 320;
     // 输出高度
-    private static final int OUTPUT_HEIGHT = 480;
+    private static final int OUTPUT_HEIGHT = 240;
     // 宽高比
     private static final float RATIO = 1f * OUTPUT_WIDTH / OUTPUT_HEIGHT;
 

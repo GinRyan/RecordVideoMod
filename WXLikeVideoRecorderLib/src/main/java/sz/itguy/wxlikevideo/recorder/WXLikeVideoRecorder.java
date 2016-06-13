@@ -6,6 +6,9 @@ import android.hardware.Camera;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -32,9 +35,9 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
     private static final String TAG = "InstantVideoRecorder";
 
     // 最长录制时间6秒
-    private static final long MAX_RECORD_TIME = 6000;
+    private static final long MAX_RECORD_TIME = 10000;
     // 帧率
-    private static final int FRAME_RATE = 23;
+    private static final int FRAME_RATE = 30;
     // 声音采样率
     private static final int SAMPLE_AUDIO_RATE_IN_HZ = 44100;
     //码率
@@ -45,11 +48,11 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
     // 输出文件路径
     private String strFinalPath;
     // 图片帧宽、高
-    private int imageWidth = 640;
-    private int imageHeight = 480;
+    private int imageWidth = 320;
+    private int imageHeight = 240;
     // 输出视频宽、高
-    private int outputWidth = 640;
-    private int outputHeight = 480;
+    private int outputWidth = 320;
+    private int outputHeight = 240;
 
     /* audio data getting thread */
     private AudioRecord audioRecord;
@@ -261,9 +264,14 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
         try {
             recorder.start();
             mFrameFilter.start();
+            filteredFrameThread
+                    .setRecorder(recorder)
+                    .setFrameFilter(mFrameFilter)
+                    .start();
             startTime = System.currentTimeMillis();
             recording = true;
             audioThread.start();
+
         } catch (Exception e) {
             e.printStackTrace();
             started = false;
@@ -336,6 +344,7 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
             try {
                 recorder.stop();
                 recorder.release();
+                filteredFrameThread.interrupt();
             } catch (FFmpegFrameRecorder.Exception e) {
                 e.printStackTrace();
             }
@@ -393,9 +402,66 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
      */
     private void recordFrame(Frame frame) throws FrameRecorder.Exception, FrameFilter.Exception {
         mFrameFilter.push(frame);
+        filteredFrameThread.sendDefaultMessage();
+//        Frame filteredFrame;
+//        while ((filteredFrame = mFrameFilter.pull()) != null) {
+//            recorder.record(filteredFrame);
+//        }
+    }
+
+    FilteredFrameThread filteredFrameThread = new FilteredFrameThread();
+
+    private static class GFHandler extends Handler {
+    }
+
+    private static class FilteredFrameThread extends Thread {
+
         Frame filteredFrame;
-        while ((filteredFrame = mFrameFilter.pull()) != null) {
-            recorder.record(filteredFrame);
+        private FFmpegFrameRecorder recorder;
+        private FFmpegFrameFilter mFrameFilter;
+
+        public FilteredFrameThread setFrameFilter(FFmpegFrameFilter mFrameFilter) {
+            this.mFrameFilter = mFrameFilter;
+            return this;
+        }
+
+        public FilteredFrameThread setRecorder(FFmpegFrameRecorder recorder) {
+            this.recorder = recorder;
+            return this;
+        }
+
+        GFHandler handler = new GFHandler() {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                if (msg.what == 0) {
+                    try {
+                        while ((filteredFrame = mFrameFilter.pull()) != null) {
+                            recorder.record(filteredFrame);
+                        }
+                    } catch (FrameRecorder.Exception e) {
+                        e.printStackTrace();
+                    } catch (FrameFilter.Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        Looper mLooper = Looper.myLooper();
+
+        public void sendDefaultMessage() {
+            Message message = handler.obtainMessage(0);
+            handler.sendMessage(message);
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            Looper.prepare();
+            synchronized (this) {
+                notifyAll();
+            }
+            Looper.loop();
         }
     }
 
