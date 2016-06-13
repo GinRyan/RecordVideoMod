@@ -35,13 +35,13 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
     private static final String TAG = "InstantVideoRecorder";
 
     // 最长录制时间6秒
-    private static final long MAX_RECORD_TIME = 10000;
+    private static final long MAX_RECORD_TIME = 30 * 1000;
     // 帧率
     private static final int FRAME_RATE = 30;
     // 声音采样率
     private static final int SAMPLE_AUDIO_RATE_IN_HZ = 44100;
-    //码率
-    public static final int BIT_RATE = 2500 * 1000;
+    // 码率上限
+    public static final int BIT_RATE = 300 * 1000;
     private final Context mContext;
     // 输出文件目录
     private final String mFolder;
@@ -284,6 +284,12 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
         if (!recording)
             return;
 
+        try {
+            filteredFrameThread.setInterrupted(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         stopTime = System.currentTimeMillis();
 
         runAudioThread = false;
@@ -344,7 +350,6 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
             try {
                 recorder.stop();
                 recorder.release();
-                filteredFrameThread.interrupt();
             } catch (FFmpegFrameRecorder.Exception e) {
                 e.printStackTrace();
             }
@@ -402,11 +407,12 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
      */
     private void recordFrame(Frame frame) throws FrameRecorder.Exception, FrameFilter.Exception {
         mFrameFilter.push(frame);
-        filteredFrameThread.sendDefaultMessage();
+        filteredFrameThread.notify();
 //        Frame filteredFrame;
 //        while ((filteredFrame = mFrameFilter.pull()) != null) {
 //            recorder.record(filteredFrame);
 //        }
+
     }
 
     FilteredFrameThread filteredFrameThread = new FilteredFrameThread();
@@ -415,7 +421,7 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
     }
 
     private static class FilteredFrameThread extends Thread {
-
+        boolean interrupted = false;
         Frame filteredFrame;
         private FFmpegFrameRecorder recorder;
         private FFmpegFrameFilter mFrameFilter;
@@ -430,38 +436,30 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
             return this;
         }
 
-        GFHandler handler = new GFHandler() {
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                if (msg.what == 0) {
-                    try {
-                        while ((filteredFrame = mFrameFilter.pull()) != null) {
-                            recorder.record(filteredFrame);
-                        }
-                    } catch (FrameRecorder.Exception e) {
-                        e.printStackTrace();
-                    } catch (FrameFilter.Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
-        Looper mLooper = Looper.myLooper();
-
-        public void sendDefaultMessage() {
-            Message message = handler.obtainMessage(0);
-            handler.sendMessage(message);
+        public void setInterrupted(boolean interrupted) {
+            this.interrupted = interrupted;
+            notify();
         }
 
         @Override
         public void run() {
             super.run();
-            Looper.prepare();
-            synchronized (this) {
-                notifyAll();
+            while (!interrupted) {
+                try {
+                    while ((filteredFrame = mFrameFilter.pull()) != null) {
+                        recorder.record(filteredFrame);
+                    }
+                    sleep(4);
+                } catch (FrameRecorder.Exception e) {
+                    e.printStackTrace();
+                } catch (FrameFilter.Exception e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+
+                }
             }
-            Looper.loop();
         }
     }
 
