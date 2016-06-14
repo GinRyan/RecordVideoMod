@@ -6,9 +6,6 @@ import android.hardware.Camera;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -21,6 +18,7 @@ import org.bytedeco.javacv.FrameRecorder;
 
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import sz.itguy.utils.FileUtil;
 import sz.itguy.wxlikevideo.views.CameraPreviewView;
@@ -363,11 +361,6 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         try {
-            // 去掉必须录制音频的限制，可以录制无声视频
-//            if (audioRecord == null || audioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
-//                startTime = System.currentTimeMillis();
-//                return;
-//            }
             if (RECORD_LENGTH > 0) {
                 int i = imagesIndex++ % images.length;
                 yuvImage = images[i];
@@ -389,6 +382,7 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
                         if (t > recorder.getTimestamp()) {
                             recorder.setTimestamp(t);
                         }
+
                         recordFrame(yuvImage);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -407,18 +401,9 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
      */
     private void recordFrame(Frame frame) throws FrameRecorder.Exception, FrameFilter.Exception {
         mFrameFilter.push(frame);
-        filteredFrameThread.notify();
-//        Frame filteredFrame;
-//        while ((filteredFrame = mFrameFilter.pull()) != null) {
-//            recorder.record(filteredFrame);
-//        }
-
     }
 
     FilteredFrameThread filteredFrameThread = new FilteredFrameThread();
-
-    private static class GFHandler extends Handler {
-    }
 
     private static class FilteredFrameThread extends Thread {
         boolean interrupted = false;
@@ -436,7 +421,9 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
             return this;
         }
 
-        public void setInterrupted(boolean interrupted) {
+
+
+        public synchronized void setInterrupted(boolean interrupted) {
             this.interrupted = interrupted;
             notify();
         }
@@ -449,15 +436,13 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
                     while ((filteredFrame = mFrameFilter.pull()) != null) {
                         recorder.record(filteredFrame);
                     }
+                    //因为上一步是耗时操作，所以等待是短周期
                     sleep(4);
                 } catch (FrameRecorder.Exception e) {
                     e.printStackTrace();
                 } catch (FrameFilter.Exception e) {
                     e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 } catch (Exception e) {
-
                 }
             }
         }
