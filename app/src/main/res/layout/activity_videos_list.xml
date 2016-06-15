@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_videos_list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="sz.itguy.recordvideodemo.VideosListActivity">
+
+    <ListView
+        android:id="@+id/videos"
+        android:layout_width="match_parent"
+        android:descendantFocusability="beforeDescendants"
+        android:layout_height="match_parent"
+        app:layout_constraintLeft_toLeftOf="@+id/activity_videos_list"
+        app:layout_constraintTop_toTopOf="@+id/activity_videos_list" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="76dp"
+        android:layout_height="76dp"
+        app:layout_constraintBottom_toBottomOf="@+id/activity_videos_list"
+        app:layout_constraintLeft_toLeftOf="@+id/activity_videos_list"
+        app:layout_constraintRight_toRightOf="@+id/activity_videos_list"
+        app:layout_constraintTop_toTopOf="@+id/activity_videos_list" />
+</android.support.constraint.ConstraintLayout>

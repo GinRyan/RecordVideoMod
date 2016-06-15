@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/constraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="140dp"
+    android:orientation="vertical">
+
+    <com.yqritc.scalablevideoview.ScalableVideoView
+        android:id="@+id/video_view"
+        android:layout_width="160dp"
+        android:layout_height="120dp"
+        android:layout_centerInParent="true"
+        app:scalableType="fitCenter" />
+
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="160dp"
+        android:layout_height="120dp"
+        android:layout_centerInParent="true">
+
+        <ImageView
+            android:id="@+id/thumbnailImageView"
+            android:layout_width="160dp"
+            android:layout_height="120dp"
+            android:scaleType="fitCenter"
+            android:background="#CDFE11" />
+
+        <ImageView
+            android:id="@+id/playImageView"
+            android:layout_width="160dp"
+            android:layout_height="120dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/video_play" />
+    </FrameLayout>
+
+</RelativeLayout>

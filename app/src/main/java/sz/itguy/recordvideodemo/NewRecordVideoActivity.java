@@ -12,10 +12,13 @@ import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import sz.itguy.utils.FileUtil;
 import sz.itguy.wxlikevideo.camera.CameraHelper;
 import sz.itguy.wxlikevideo.recorder.WXLikeVideoRecorder;
 import sz.itguy.wxlikevideo.views.CameraPreviewView;
+import sz.itguy.wxlikevideo.views.CircleBackgroundTextView;
 
 /**
  * 新视频录制页面
@@ -32,6 +35,8 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
     private static final int OUTPUT_HEIGHT = 240;
     // 宽高比
     private static final float RATIO = 1f * OUTPUT_WIDTH / OUTPUT_HEIGHT;
+    @BindView(R.id.button_other)
+    CircleBackgroundTextView buttonOther;
 
     private Camera mCamera;
 
@@ -57,6 +62,8 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
         mRecorder.setOutputSize(OUTPUT_WIDTH, OUTPUT_HEIGHT);
 
         setContentView(R.layout.activity_new_recorder);
+        ButterKnife.bind(this);
+
         CameraPreviewView preview = (CameraPreviewView) findViewById(R.id.camera_preview);
         preview.setCamera(mCamera, cameraId);
 
@@ -65,6 +72,13 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
         findViewById(R.id.button_start).setOnTouchListener(this);
 
         ((TextView) findViewById(R.id.filePathTextView)).setText("请在" + FileUtil.MEDIA_FILE_DIR + "查看录制的视频文件");
+
+        buttonOther.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(NewRecordVideoActivity.this, VideosListActivity.class));
+            }
+        });
     }
 
     @Override
@@ -84,7 +98,7 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
     }
 
     private void releaseCamera() {
-        if (mCamera != null){
+        if (mCamera != null) {
             mCamera.setPreviewCallback(null);
             // 释放前先停止预览
             mCamera.stopPreview();
@@ -112,9 +126,10 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
 
     /**
      * 准备视频录制器
+     *
      * @return
      */
-    private boolean prepareVideoRecorder(){
+    private boolean prepareVideoRecorder() {
         if (!FileUtil.isSDCardMounted()) {
             Toast.makeText(this, "SD卡不可用！", Toast.LENGTH_SHORT).show();
             return false;
@@ -144,32 +159,32 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    isCancelRecord = false;
-                    mDownX = event.getX();
-                    mDownY = event.getY();
-                    startRecord();
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    if (!mRecorder.isRecording())
-                        return false;
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                isCancelRecord = false;
+                mDownX = event.getX();
+                mDownY = event.getY();
+                startRecord();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (!mRecorder.isRecording())
+                    return false;
 
-                    float y = event.getY();
-                    if (y - mDownY < CANCEL_RECORD_OFFSET) {
-                        if (!isCancelRecord) {
-                            // cancel record
-                            isCancelRecord = true;
-                            Toast.makeText(this, "cancel record", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        isCancelRecord = false;
+                float y = event.getY();
+                if (y - mDownY < CANCEL_RECORD_OFFSET) {
+                    if (!isCancelRecord) {
+                        // cancel record
+                        isCancelRecord = true;
+                        Toast.makeText(this, "cancel record", Toast.LENGTH_SHORT).show();
                     }
-                    break;
-                case MotionEvent.ACTION_UP:
-                    stopRecord();
-                    break;
-            }
+                } else {
+                    isCancelRecord = false;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                stopRecord();
+                break;
+        }
 
         return true;
     }
