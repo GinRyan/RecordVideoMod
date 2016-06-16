@@ -1,24 +1,24 @@
 package sz.itguy.recordvideodemo.adapter;
 
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.yqritc.scalablevideoview.ScalableVideoView;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import sz.itguy.recordvideodemo.R;
+import sz.itguy.recordvideodemo.views.PreviewScalableVideoView;
 
 /**
  * Created by Liang on 2016/6/15.
@@ -34,7 +34,7 @@ public class VideoAdapter extends ArrayAdapter<File> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder h;
+        final ViewHolder h;
         File path = getItem(position);
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_video, parent, false);
@@ -45,7 +45,33 @@ public class VideoAdapter extends ArrayAdapter<File> {
         }
         try {
             h.videoView.setDataSource(getContext(), Uri.fromFile(new File(path.getAbsolutePath())));
+            h.playImageView.setVisibility(View.VISIBLE);
+            h.thumbnailImageView.setVisibility(View.VISIBLE);
             Picasso.with(getContext()).load(new File(path.getAbsolutePath().replace("Media", "cache"))).into(h.thumbnailImageView);
+            h.playImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (h.videoView.isPlaying()) {
+                        h.videoView.stop();
+                        h.playImageView.setVisibility(View.VISIBLE);
+                        h.thumbnailImageView.setVisibility(View.VISIBLE);
+                    } else {
+                        try {
+                            h.videoView.prepareAsync(new MediaPlayer.OnPreparedListener() {
+                                @Override
+                                public void onPrepared(MediaPlayer mp) {
+                                    h.videoView.setLooping(true);
+                                    h.videoView.start();
+                                    h.playImageView.setVisibility(View.INVISIBLE);
+                                    h.thumbnailImageView.setVisibility(View.INVISIBLE);
+                                }
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -54,7 +80,7 @@ public class VideoAdapter extends ArrayAdapter<File> {
 
     static class ViewHolder {
         @BindView(R.id.video_view)
-        ScalableVideoView videoView;
+        PreviewScalableVideoView videoView;
         @BindView(R.id.thumbnailImageView)
         ImageView thumbnailImageView;
         @BindView(R.id.playImageView)
@@ -62,22 +88,32 @@ public class VideoAdapter extends ArrayAdapter<File> {
 
         ViewHolder(final View view) {
             ButterKnife.bind(this, view);
-            playImageView.setOnClickListener(new View.OnClickListener() {
+            videoView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (videoView.isPlaying()) {
                         videoView.stop();
-                    } else {
-                        try {
-                            videoView.prepare();
-                            videoView.start();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
                     }
+                    playImageView.setVisibility(View.VISIBLE);
+                    thumbnailImageView.setVisibility(View.VISIBLE);
                 }
             });
+//            videoView
+//                    .setOnAttachedAction(new PreviewScalableVideoView.OnAttachedAction() {
+//                        @Override
+//                        public void onAttached(MediaPlayer mp, ScalableVideoView v) {
+//                            playImageView.setVisibility(View.VISIBLE);
+//                            thumbnailImageView.setVisibility(View.VISIBLE);
+//                        }
+//                    })
+//                    .setOnDetachedAction(new PreviewScalableVideoView.OnDetachedAction() {
+//                        @Override
+//                        public void onDetached(MediaPlayer mp, ScalableVideoView v) {
+//                            playImageView.setVisibility(View.VISIBLE);
+//                            thumbnailImageView.setVisibility(View.VISIBLE);
+//                        }
+//                    });
+
         }
     }
-
 }

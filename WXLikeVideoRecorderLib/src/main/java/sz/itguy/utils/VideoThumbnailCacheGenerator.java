@@ -18,11 +18,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class VideoThumbnailCacheGenerator {
 
-    int cpuNum = 1;
+    int cpuNum = 0;
     ExecutorService executor;
 
     public VideoThumbnailCacheGenerator() {
-        //cpuNum = Runtime.getRuntime().availableProcessors();
+        cpuNum = Runtime.getRuntime().availableProcessors();
         executor = Executors.newFixedThreadPool(cpuNum);
     }
 
