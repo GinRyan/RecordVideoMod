@@ -83,12 +83,8 @@ public class CircleBackgroundTextView extends TextView {
                 sweepedAngle = 0f;
                 break;
         }
-        return super.onTouchEvent(event) || true;
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        return super.dispatchTouchEvent(event);
+        super.onTouchEvent(event);
+        return true;
     }
 
 }
