@@ -34,6 +34,7 @@
             android:layout_marginTop="15dp"
             android:text="已拍摄"
             android:textColor="#FFFFFF" />
+
     </LinearLayout>
 
     <TextView

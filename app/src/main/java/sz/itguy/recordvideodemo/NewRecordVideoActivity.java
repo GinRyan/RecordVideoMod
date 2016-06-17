@@ -4,13 +4,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.lang.ref.WeakReference;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -187,63 +184,6 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
         }
 
         return true;
-    }
-
-    /**
-     * 开始录制失败回调任务
-     *
-     * @author Martin
-     */
-    public static class StartRecordFailCallbackRunnable implements Runnable {
-
-        private WeakReference<NewRecordVideoActivity> mNewRecordVideoActivityWeakReference;
-
-        public StartRecordFailCallbackRunnable(NewRecordVideoActivity activity) {
-            mNewRecordVideoActivityWeakReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void run() {
-            NewRecordVideoActivity activity;
-            if (null == (activity = mNewRecordVideoActivityWeakReference.get()))
-                return;
-
-            String filePath = activity.mRecorder.getFilePath();
-            if (!TextUtils.isEmpty(filePath)) {
-                FileUtil.deleteFile(filePath);
-                Toast.makeText(activity, "Start record failed.", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    /**
-     * 停止录制回调任务
-     *
-     * @author Martin
-     */
-    public static class StopRecordCallbackRunnable implements Runnable {
-
-        private WeakReference<NewRecordVideoActivity> mNewRecordVideoActivityWeakReference;
-
-        public StopRecordCallbackRunnable(NewRecordVideoActivity activity) {
-            mNewRecordVideoActivityWeakReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void run() {
-            NewRecordVideoActivity activity;
-            if (null == (activity = mNewRecordVideoActivityWeakReference.get()))
-                return;
-
-            String filePath = activity.mRecorder.getFilePath();
-            if (!TextUtils.isEmpty(filePath)) {
-                if (activity.isCancelRecord) {
-                    FileUtil.deleteFile(filePath);
-                } else {
-                    Toast.makeText(activity, "Video file path: " + filePath, Toast.LENGTH_LONG).show();
-                }
-            }
-        }
     }
 
 }
