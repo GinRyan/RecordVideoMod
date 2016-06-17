@@ -98,22 +98,6 @@ public class VideoAdapter extends ArrayAdapter<File> {
                     thumbnailImageView.setVisibility(View.VISIBLE);
                 }
             });
-//            videoView
-//                    .setOnAttachedAction(new PreviewScalableVideoView.OnAttachedAction() {
-//                        @Override
-//                        public void onAttached(MediaPlayer mp, ScalableVideoView v) {
-//                            playImageView.setVisibility(View.VISIBLE);
-//                            thumbnailImageView.setVisibility(View.VISIBLE);
-//                        }
-//                    })
-//                    .setOnDetachedAction(new PreviewScalableVideoView.OnDetachedAction() {
-//                        @Override
-//                        public void onDetached(MediaPlayer mp, ScalableVideoView v) {
-//                            playImageView.setVisibility(View.VISIBLE);
-//                            thumbnailImageView.setVisibility(View.VISIBLE);
-//                        }
-//                    });
-
         }
     }
 }

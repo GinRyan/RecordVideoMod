@@ -101,14 +101,6 @@ public class PreviewScalableVideoView extends TextureView implements TextureView
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-//        if (mMediaPlayer == null) {
-//            return;
-//        }
-//        if (isPlaying()) {
-//            stop();
-//        }
-//        release();
-//        mMediaPlayer = new MediaPlayer();
         if (onAttachedAction != null) {
             onAttachedAction.onAttached(mMediaPlayer, this);
         }
