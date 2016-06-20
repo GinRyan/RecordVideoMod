@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -22,7 +23,7 @@ import sz.itguy.wxlikevideo.views.CircleBackgroundTextView;
  *
  * @author Martin
  */
-public class NewRecordVideoActivity extends Activity implements View.OnTouchListener {
+public class NewRecordVideoActivity extends Activity {
 
     private static final String TAG = "NewRecordVideoActivity";
 
@@ -42,6 +43,7 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
     private static final int CANCEL_RECORD_OFFSET = -100;
     private float mDownX, mDownY;
     private boolean isCancelRecord = false;
+    CircleBackgroundTextView circleBackgroundTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +68,8 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
 
         mRecorder.setCameraPreviewView(preview);
 
-        findViewById(R.id.button_start).setOnTouchListener(this);
+
+        circleBackgroundTextView = (CircleBackgroundTextView) findViewById(R.id.button_start);
 
         ((TextView) findViewById(R.id.filePathTextView)).setText("请在" + FileUtil.MEDIA_FILE_DIR + "查看录制的视频文件");
 
@@ -76,7 +79,44 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
                 startActivity(new Intent(NewRecordVideoActivity.this, VideosListActivity.class));
             }
         });
+
+        initClickEvent();
     }
+
+    private void initClickEvent() {
+        circleBackgroundTextView
+                .setOnFingerMoveListener(new CircleBackgroundTextView.OnFingerMoveListener() {
+                    @Override
+                    public void onMove(CircleBackgroundTextView view, MotionEvent event) {
+                        onTouch(view, event);
+                    }
+                })
+                .setOnFingerDownListener(new CircleBackgroundTextView.OnFingerDownListener() {
+                    @Override
+                    public void onDown(CircleBackgroundTextView view, MotionEvent event) {
+                        onTouch(view, event);
+                    }
+                })
+                .setOnFingerUpListener(new CircleBackgroundTextView.OnFingerUpListener() {
+                    @Override
+                    public void onUp(CircleBackgroundTextView view, MotionEvent event) {
+                        onTouch(view, event);
+                    }
+                })
+                .setOnProgressListener(new CircleBackgroundTextView.OnProgressListener() {
+                    @Override
+                    public void onProgress(int progress) {
+                        tProgress = progress;
+                        if (progress >= 100) {
+                            stopRecord();
+                        } else {
+                            Log.d("record", "Recording progress :" + progress);
+                        }
+                    }
+                });
+    }
+
+    int tProgress = 0;
 
     @Override
     protected void onPause() {
@@ -92,6 +132,8 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
         }
         //releaseCamera();              // release the camera immediately on pause event
         mCamera.stopPreview();
+        tProgress = 0;
+        circleBackgroundTextView.reset();
     }
 
     private void releaseCamera() {
@@ -108,6 +150,7 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
     protected void onResume() {
         super.onResume();
         mCamera.startPreview();
+
     }
 
     @Override
@@ -166,7 +209,6 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
         }
     }
 
-    @Override
     public boolean onTouch(View v, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -191,10 +233,13 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                stopRecord();
+                if (tProgress < 100) {
+                    stopRecord();
+                } else {
+                    return true;
+                }
                 break;
         }
-
         return true;
     }
 
