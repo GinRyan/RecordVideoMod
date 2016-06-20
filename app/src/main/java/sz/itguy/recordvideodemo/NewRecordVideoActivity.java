@@ -90,8 +90,8 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
                 FileUtil.deleteFile(mRecorder.getFilePath());
             }
         }
-        releaseCamera();              // release the camera immediately on pause event
-        finish();
+        //releaseCamera();              // release the camera immediately on pause event
+        mCamera.stopPreview();
     }
 
     private void releaseCamera() {
@@ -102,6 +102,18 @@ public class NewRecordVideoActivity extends Activity implements View.OnTouchList
             mCamera.release();        // release the camera for other applications
             mCamera = null;
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mCamera.startPreview();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        releaseCamera();
     }
 
     /**

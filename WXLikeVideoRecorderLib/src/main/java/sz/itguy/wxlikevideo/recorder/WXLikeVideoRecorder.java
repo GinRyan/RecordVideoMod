@@ -18,7 +18,6 @@ import org.bytedeco.javacv.FrameRecorder;
 
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import sz.itguy.utils.FileUtil;
 import sz.itguy.wxlikevideo.views.CameraPreviewView;
@@ -262,6 +261,8 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
         try {
             recorder.start();
             mFrameFilter.start();
+
+            filteredFrameThread = new FilteredFrameThread();
             filteredFrameThread
                     .setRecorder(recorder)
                     .setFrameFilter(mFrameFilter)
@@ -284,6 +285,7 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
 
         try {
             filteredFrameThread.setInterrupted(true);
+            filteredFrameThread = null;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -350,11 +352,21 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
                 recorder.release();
             } catch (FFmpegFrameRecorder.Exception e) {
                 e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } catch (Error e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    recorder = null;
+                    // 释放帧过滤器
+                    releaseFrameFilter();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } catch (Error er) {
+                    er.printStackTrace();
+                }
             }
-            recorder = null;
-
-            // 释放帧过滤器
-            releaseFrameFilter();
         }
     }
 
@@ -403,7 +415,7 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
         mFrameFilter.push(frame);
     }
 
-    FilteredFrameThread filteredFrameThread = new FilteredFrameThread();
+    FilteredFrameThread filteredFrameThread = null;
 
     private static class FilteredFrameThread extends Thread {
         boolean interrupted = false;
@@ -422,27 +434,33 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
         }
 
 
-
         public synchronized void setInterrupted(boolean interrupted) {
             this.interrupted = interrupted;
             notify();
+        }
+
+        public synchronized void setNULL() {
+
         }
 
         @Override
         public void run() {
             super.run();
             while (!interrupted) {
-                try {
-                    while ((filteredFrame = mFrameFilter.pull()) != null) {
-                        recorder.record(filteredFrame);
+                synchronized (this) {
+                    try {
+                        while ((filteredFrame = mFrameFilter.pull()) != null) {
+                            recorder.record(filteredFrame);
+                        }
+                        //因为上一步是耗时操作，所以等待是短周期
+                        sleep(2);
+                    } catch (FrameRecorder.Exception e) {
+                        e.printStackTrace();
+                    } catch (FrameFilter.Exception e) {
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    //因为上一步是耗时操作，所以等待是短周期
-                    sleep(4);
-                } catch (FrameRecorder.Exception e) {
-                    e.printStackTrace();
-                } catch (FrameFilter.Exception e) {
-                    e.printStackTrace();
-                } catch (Exception e) {
                 }
             }
         }
