@@ -6,7 +6,7 @@
     android:layout_height="280dp"
     android:orientation="vertical">
 
-    <sz.itguy.recordvideodemo.views.PreviewScalableVideoView
+    <sz.itguy.wxlikevideo.views.PreviewScalableVideoView
         android:id="@+id/video_view"
         android:layout_width="320dp"
         android:layout_height="240dp"

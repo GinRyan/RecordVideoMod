@@ -10,7 +10,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
-import com.yqritc.scalablevideoview.ScalableVideoView;
 
 import java.io.File;
 import java.util.List;
@@ -18,7 +17,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import sz.itguy.recordvideodemo.R;
-import sz.itguy.recordvideodemo.views.PreviewScalableVideoView;
+import sz.itguy.wxlikevideo.views.PreviewScalableVideoView;
 
 /**
  * Created by Liang on 2016/6/15.

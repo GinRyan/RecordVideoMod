@@ -1,4 +1,4 @@
-package sz.itguy.recordvideodemo.views;
+package sz.itguy.wxlikevideo.views;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
