@@ -22,7 +22,6 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
-            android:onClick="onClick"
             android:text="按住拍"
             android:textColor="#FFFFFF" />
 
