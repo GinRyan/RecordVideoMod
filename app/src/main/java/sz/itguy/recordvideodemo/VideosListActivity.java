@@ -34,7 +34,7 @@ public class VideosListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_videos_list);
         ButterKnife.bind(this);
-        final File[] list = new File(Environment.getExternalStorageDirectory() + FileUtil.MEDIA_FILE_DIR).listFiles();
+        final File[] list = new File(Environment.getExternalStorageDirectory() + FileUtil.getAppMediaDir(this)).listFiles();
         for (int i = 0; i < list.length; i++) {
             Log.d("file", list[i].getAbsolutePath());
         }

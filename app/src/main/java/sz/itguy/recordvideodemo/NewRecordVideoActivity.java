@@ -57,7 +57,7 @@ public class NewRecordVideoActivity extends Activity {
             return;
         }
         // 初始化录像机
-        mRecorder = new WXLikeVideoRecorder(this, FileUtil.MEDIA_FILE_DIR);
+        mRecorder = new WXLikeVideoRecorder(this, FileUtil.getAppMediaDir(this));
         mRecorder.setOutputSize(OUTPUT_WIDTH, OUTPUT_HEIGHT);
 
         setContentView(R.layout.activity_new_recorder);
@@ -71,7 +71,7 @@ public class NewRecordVideoActivity extends Activity {
 
         circleBackgroundTextView = (CircleBackgroundTextView) findViewById(R.id.button_start);
 
-        ((TextView) findViewById(R.id.filePathTextView)).setText("请在" + FileUtil.MEDIA_FILE_DIR + "查看录制的视频文件");
+        ((TextView) findViewById(R.id.filePathTextView)).setText("请在" + FileUtil.getAppMediaDir(this) + "查看录制的视频文件");
 
         buttonOther.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -1,5 +1,6 @@
 package sz.itguy.utils;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -15,23 +16,14 @@ public class BitmapUtil {
         return BitmapFactory.decodeByteArray(data, 0, data.length);
     }
 
-    public static Bitmap clipFromTop(Bitmap bitmap, int dstWidth, int dstHeight) {
-//        ss
-        return null;
-    }
-
-    public static void saveBitmap2File(Bitmap bitmap) {
-//
-    }
-
-    public static void saveBitmap2File(byte[] data) {
+    public static void saveBitmap2File(Context context, byte[] data) {
         try {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
-            FileOutputStream fileOutputStream = new FileOutputStream(FileUtil.getOutputMediaFile(FileUtil.MEDIA_TYPE_IMAGE));
+            FileOutputStream fileOutputStream = new FileOutputStream(FileUtil.getOutputMediaFile(context, FileUtil.MEDIA_TYPE_IMAGE));
             byte[] buffer = new byte[2048];
             int length;
             while ((length = byteArrayInputStream.read(buffer)) != -1) {
-                fileOutputStream.write(buffer, 0 , length);
+                fileOutputStream.write(buffer, 0, length);
             }
             fileOutputStream.close();
             byteArrayInputStream.close();
