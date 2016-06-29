@@ -284,8 +284,11 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
             return;
 
         try {
+            Log.i("RECORDER", Thread.currentThread().getName() + "  " + " stop recording");
             filteredFrameThread.setInterrupted(true);
+            filteredFrameThread.join();
             filteredFrameThread = null;
+            Log.i("RECORDER", Thread.currentThread().getName() + "  " + " FilteredFrameThread has stopped");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -295,6 +298,7 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
         runAudioThread = false;
         try {
             audioThread.join();
+            Log.i("RECORDER", Thread.currentThread().getName() + "  " + " AudioThread has stopped");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -418,7 +422,7 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
     FilteredFrameThread filteredFrameThread = null;
 
     private static class FilteredFrameThread extends Thread {
-        boolean interrupted = false;
+        volatile boolean interrupted = false;
         Frame filteredFrame;
         private FFmpegFrameRecorder recorder;
         private FFmpegFrameFilter mFrameFilter;
@@ -434,13 +438,9 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
         }
 
 
-        public synchronized void setInterrupted(boolean interrupted) {
+        public void setInterrupted(boolean interrupted) {
             this.interrupted = interrupted;
-            notify();
-        }
-
-        public synchronized void setNULL() {
-
+            //notify();
         }
 
         @Override
@@ -463,6 +463,7 @@ public class WXLikeVideoRecorder implements Camera.PreviewCallback, CameraPrevie
                     }
                 }
             }
+            Log.i("RECORDER", Thread.currentThread().getName() + "  " + " FilterThread loop break!");
         }
     }
 
